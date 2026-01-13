@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Saradu - Tailor Shop Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 230px;
+      background: #2c3e50;
+      color: #fff;
+      padding: 20px 0;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+    }
+
+    .sidebar-title {
+      padding: 0 20px 15px;
+      font-size: 22px;
+      font-weight: 600;
+      border-bottom: 1px solid #34495e;
+      margin-bottom: 10px;
+    }
+
+    .sidebar-subtitle {
+      padding: 0 20px 15px;
+      font-size: 12px;
+      opacity: 0.7;
+      margin-bottom: 10px;
+    }
+
+    .nav-btn {
+      display: block;
+      width: 100%;
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      color: #ecf0f1;
+      text-align: left;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: #34495e;
+    }
+
+    .nav-btn.active {
+      background: #3498db;
+    }
+
+    /* Main area */
+    .main {
+      margin-left: 230px;
+      padding: 20px;
+      width: calc(100% - 230px);
+    }
+
+    .section-card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .section-card.active {
+      display: block;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      color: #2c3e50;
+    }
+
+    .section-desc {
+      font-size: 12px;
+      color: #777;
+      margin-bottom: 15px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+      flex: 1 1 220px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .required label::after {
+      content: " *";
+      color: #e74c3c;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 13px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    input[readonly] {
+      background: #f0f0f0;
+    }
+
+    .checkbox-inline {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 8px 0;
+      font-size: 13px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 4px;
+      border: none;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+
+    .btn-primary {
+      background: #3498db;
+      color: #fff;
+    }
+
+    .btn-success {
+      background: #27ae60;
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #7f8c8d;
+      color: #fff;
+    }
+
+    .btn-danger {
+      background: #e74c3c;
+      color: #fff;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #7f8c8d;
+      color: #7f8c8d;
+    }
+
+    .msg {
+      font-size: 12px;
+      margin-top: 8px;
+      display: none;
+      border-radius: 4px;
+      padding: 6px 8px;
+    }
+
+    .msg.success {
+      display: block;
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .msg.error {
+      display: block;
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .filters .form-group {
+      flex: 1 1 200px;
+      margin-bottom: 0;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    th,
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #3498db;
+      color: #fff;
+      font-weight: 500;
+    }
+
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+
+    /* Receipt (for layout reference; printed page uses its own styles) */
+    .receipt-box {
+      max-width: 700px;
+      margin-top: 10px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 16px;
+      background: #fff;
+    }
+
+    .receipt-header {
+      text-align: center;
+      border-bottom: 1px solid #333;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+    }
+
+    .receipt-header h3 {
+      margin: 0;
+    }
+
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 2px 0;
+    }
+
+    .receipt-row strong {
+      font-weight: 600;
+    }
+
+    .receipt-total {
+      margin-top: 6px;
+      border-top: 1px solid #333;
+      padding-top: 4px;
+      font-weight: 600;
+    }
+
+    .receipt-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+    .receipt-table th,
+    .receipt-table td {
+      border: 1px solid #333;
+      padding: 4px;
+      text-align: left;
+    }
+    .receipt-table th {
+      background: none !important;
+      color: #000;
+      font-weight: bold;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 8px;
+      padding: 16px 18px;
+      max-width: 500px;
+      width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .close-x {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 11px;
+      border-radius: 3px;
+      background: #ecf0f1;
+    }
+
+    .tag-status {
+      background: #f1c40f;
+      color: #000;
+    }
+
+    .tag-status.done {
+      background: #2ecc71;
+      color: #fff;
+    }
+
+    .toggle-btn {
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: none;
+      font-size: 12px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      background: #7f8c8d;
+      color: #fff;
+    }
+
+    .toggle-btn.active {
+      background: #3498db;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        position: static;
+        width: 100%;
+      }
+      .main {
+        margin-left: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-title">Saradu</div>
+      <div class="sidebar-subtitle">Tailor shop manager</div>
+      <button class="nav-btn active" onclick="showSection('sec-add-customer', this)">
+        Add New Customer
+      </button>
+      <button class="nav-btn" onclick="showSection('sec-add-order', this)">
+        Add Order
+      </button>
+      <button class="nav-btn" onclick="showSection('sec-billing', this)">
+        Billing Receipt
+      </button>
+      <button class="nav-btn" onclick="showSection('sec-report', this)">
+        Orders Report
+      </button>
+      <button class="nav-btn" onclick="showSection('sec-management', this)">
+        Order Management
+      </button>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+      <!-- Add Customer -->
+      <section id="sec-add-customer" class="section-card active">
+        <h2>Add New Customer</h2>
+        <div class="section-desc">
+         
+        </div>
+
+        <div id="msg-customer" class="msg"></div>
+
+        <form id="form-customer">
+          <div class="form-group required">
+            <label for="customer-name">Customer Name</label>
+            <input id="customer-name" type="text" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="customer-phone">Phone</label>
+              <input id="customer-phone" type="text" />
+            </div>
+            <div class="form-group">
+              <label for="customer-address">Address</label>
+              <input id="customer-address" type="text" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="customer-notes">Notes</label>
+            <textarea id="customer-notes"></textarea>
+          </div>
+          <button type="submit" class="btn btn-success" id="btn-customer-submit">
+            Save Customer
+          </button>
+        </form>
+
+        <hr style="margin:20px 0 10px;">
+        <h3 style="margin:0 0 8px;font-size:16px;">Existing Customers</h3>
+        <div class="section-desc">Edit or remove customers from this list.</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="customer-list-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Add Order -->
+      <section id="sec-add-order" class="section-card">
+        <h2>Add Order</h2>
+        <div class="section-desc">
+          Select a customer and enter order details like type, price, date and
+          advance amount.
+        </div>
+
+        <div id="msg-order" class="msg"></div>
+
+        <form id="form-order">
+          <div class="form-group required">
+            <label for="order-customer">Select Customer</label>
+            <select id="order-customer" required>
+              <option value="">-- Select Customer --</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group required">
+              <label for="order-type">Order Type</label>
+              <select id="order-type" required>
+                <option value="">-- Select Order Type --</option>
+              </select>
+            </div>
+            <div class="form-group" id="group-order-type-other" style="display:none;">
+              <label for="order-type-other">Other Order Type</label>
+              <input id="order-type-other" type="text" placeholder="Enter type" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group required">
+              <label for="order-date">Order Date</label>
+              <input id="order-date" type="date" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="order-description">Description</label>
+            <textarea
+              id="order-description"
+              placeholder="Color, pattern, design, any special instruction..."
+            ></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group required">
+              <label for="order-price">Approx Price</label>
+              <input
+                id="order-price"
+                type="number"
+                step="0.01"
+                min="0"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <div class="checkbox-inline">
+                <input type="checkbox" id="order-advance-check" />
+                <span>Paid in Advance?</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row" id="group-advance" style="display:none;">
+            <div class="form-group">
+              <label for="order-advance">Advance Amount</label>
+              <input
+                id="order-advance"
+                type="number"
+                step="0.01"
+                min="0"
+                value="0"
+              />
+            </div>
+            <div class="form-group">
+              <label>Pending Amount</label>
+              <input
+                id="order-pending"
+                type="text"
+                readonly
+                value="0.00"
+              />
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-success">Save Order</button>
+        </form>
+      </section>
+
+      <!-- Billing -->
+      <section id="sec-billing" class="section-card">
+        <h2>Billing Receipt</h2>
+        <div class="section-desc">
+          Select a customer, tick their orders, then click "Generate Bill". A new
+          receipt page will open where you can edit and print.
+        </div>
+
+        <div class="form-group">
+          <label for="bill-customer-select">Select Customer</label>
+          <select id="bill-customer-select">
+            <option value="">-- Select Customer --</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Select</th>
+                <th>Order ID</th>
+                <th>Order Date</th>
+                <th>Type</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Paid</th>
+                <th>Pending</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="bill-orders-tbody"></tbody>
+          </table>
+        </div>
+
+        <button
+          id="btn-generate-bill"
+          class="btn btn-primary"
+          style="margin-top:10px;"
+          type="button"
+          onclick="openReceiptWindow()"
+        >
+          Generate Bill
+        </button>
+      </section>
+
+      <!-- Orders Report -->
+      <section id="sec-report" class="section-card">
+        <h2>Orders Report</h2>
+        <div class="section-desc">
+          View all orders and filter by customer, order type, and status. You
+          can also print or export this report to Excel (CSV).
+        </div>
+
+        <div class="filters">
+          <div class="form-group">
+            <label for="filter-cust">Filter by Customer</label>
+            <select id="filter-cust">
+              <option value="">All Customers</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="filter-type">Filter by Order Type</label>
+            <select id="filter-type">
+              <option value="">All Order Types</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="filter-status">Filter by Status</label>
+            <select id="filter-status">
+              <option value="">All Status</option>
+              <option value="Received">Received</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="Delivered">Delivered</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-secondary" onclick="clearReportFilters()">
+          Clear Filters
+        </button>
+        <button class="btn btn-secondary" onclick="printReport()">
+          Print Report
+        </button>
+        <button class="btn btn-secondary" onclick="exportReportToExcel()">
+          Export as Excel
+        </button>
+
+        <div class="table-wrap" id="report-table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Order ID</th>
+                <th>Order Date</th>
+                <th>Customer</th>
+                <th>Order Type</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Paid</th>
+                <th>Pending</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="report-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Order Management -->
+      <section id="sec-management" class="section-card">
+        <h2>Order Management</h2>
+        <div class="section-desc">
+          Edit existing orders, change their status, or remove an order.
+        </div>
+
+        <button
+          id="btn-toggle-pending"
+          class="toggle-btn"
+          type="button"
+          onclick="togglePendingView()"
+        >
+          Show Only Pending Orders
+        </button>
+
+        <div id="msg-manage" class="msg"></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Order Date</th>
+                <th>Type</th>
+                <th>Price</th>
+                <th>Paid</th>
+                <th>Pending</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="manage-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Edit Order Modal -->
+  <div id="modal-backdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Edit Order</h3>
+        <button class="close-x" onclick="closeEditModal()">×</button>
+      </div>
+
+      <form id="form-edit-order">
+        <input type="hidden" id="edit-id" />
+
+        <div class="form-group">
+          <label>Customer</label>
+          <input id="edit-customer-name" type="text" readonly />
+        </div>
+
+        <div class="form-group required">
+          <label for="edit-date">Order Date</label>
+          <input id="edit-date" type="date" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group required">
+            <label for="edit-type">Order Type</label>
+            <select id="edit-type" required>
+              <option value="">-- Select Order Type --</option>
+            </select>
+          </div>
+          <div
+            class="form-group"
+            id="group-edit-type-other"
+            style="display:none;"
+          >
+            <label for="edit-type-other">Other Order Type</label>
+            <input id="edit-type-other" type="text" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-description">Description</label>
+          <textarea id="edit-description"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group required">
+            <label for="edit-price">Price</label>
+            <input id="edit-price" type="number" step="0.01" min="0" />
+          </div>
+          <div class="form-group">
+            <label for="edit-advance">Advance Amount</label>
+            <input id="edit-advance" type="number" step="0.01" min="0" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Pending Amount</label>
+          <input id="edit-pending" type="text" readonly />
+        </div>
+
+        <div class="form-group required">
+          <label for="edit-status">Status</label>
+          <select id="edit-status">
+            <option value="Received">Received</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        </div>
+
+        <div style="margin-top:8px;">
+          <button type="submit" class="btn btn-success">Save Changes</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="closeEditModal()"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ===============================
+    // CONFIG: ORDER TYPES
+    // ===============================
+    const ORDER_TYPES = [
+      "Blouse Stitching",
+      "Skirt Stitching",
+      "Chudidar Stitching",
+      "Falls Stitching",
+      "Uniform Stitching",
+      "Pavadai Stitching",
+      "Other",
+    ];
+
+    // ===============================
+    // DATA & LOCALSTORAGE
+    // ===============================
+    const LS_CUSTOMERS_KEY = "saradu_customers";
+    const LS_ORDERS_KEY = "saradu_orders";
+
+    let customers = [];
+    let orders = [];
+    let editingCustomerId = null;
+
+    function loadData() {
+      const c = localStorage.getItem(LS_CUSTOMERS_KEY);
+      const o = localStorage.getItem(LS_ORDERS_KEY);
+      customers = c ? JSON.parse(c) : [];
+      orders = o ? JSON.parse(o) : [];
+    }
+
+    function saveCustomers() {
+      localStorage.setItem(LS_CUSTOMERS_KEY, JSON.stringify(customers));
+    }
+
+    function saveOrders() {
+      localStorage.setItem(LS_ORDERS_KEY, JSON.stringify(orders));
+    }
+
+    // ===============================
+    // NAVIGATION
+    // ===============================
+    function showSection(sectionId, btn) {
+      document
+        .querySelectorAll(".section-card")
+        .forEach((sec) => sec.classList.remove("active"));
+      document.getElementById(sectionId).classList.add("active");
+
+      document
+        .querySelectorAll(".nav-btn")
+        .forEach((b) => b.classList.remove("active"));
+      if (btn) btn.classList.add("active");
+
+      if (sectionId === "sec-add-order") {
+        refreshCustomerDropdowns();
+        populateOrderTypeSelect("order-type");
+      }
+      if (sectionId === "sec-billing") {
+        refreshBillingSection();
+      }
+      if (sectionId === "sec-report") {
+        refreshReportFilters();
+        renderReportTable();
+      }
+      if (sectionId === "sec-management") {
+        renderManageTable();
+      }
+    }
+
+    // ===============================
+    // HELPER: MESSAGES
+    // ===============================
+    function showMessage(id, text, type) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = text;
+      el.className = "msg " + type;
+      if (text) {
+        setTimeout(() => {
+          el.className = "msg";
+          el.textContent = "";
+        }, 2500);
+      }
+    }
+
+    // ===============================
+    // CUSTOMER HELPERS
+    // ===============================
+    function refreshCustomerDropdowns() {
+      const orderCust = document.getElementById("order-customer");
+      const filterCust = document.getElementById("filter-cust");
+      const billCust = document.getElementById("bill-customer-select");
+
+      orderCust.innerHTML = '<option value="">-- Select Customer --</option>';
+      filterCust.innerHTML = '<option value="">All Customers</option>';
+      billCust.innerHTML = '<option value="">-- Select Customer --</option>';
+
+      customers.forEach((c) => {
+        const opt1 = document.createElement("option");
+        opt1.value = c.id;
+        opt1.textContent = c.name;
+        orderCust.appendChild(opt1);
+
+        const opt2 = document.createElement("option");
+        opt2.value = c.id;
+        opt2.textContent = c.name;
+        filterCust.appendChild(opt2);
+
+        const opt3 = document.createElement("option");
+        opt3.value = c.id;
+        opt3.textContent = c.name;
+        billCust.appendChild(opt3);
+      });
+    }
+
+    function findCustomerById(id) {
+      return customers.find((c) => c.id === id) || null;
+    }
+
+    function renderCustomerList() {
+      const tbody = document.getElementById("customer-list-tbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+      customers.forEach((c, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${c.name}</td>
+          <td>${c.phone || "-"}</td>
+          <td>${c.address || "-"}</td>
+          <td>${c.notes || "-"}</td>
+          <td>
+            <button class="btn btn-outline" type="button" onclick="startEditCustomer('${c.id}')">Edit</button>
+            <button class="btn btn-danger" type="button" onclick="removeCustomer('${c.id}')">Remove</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function startEditCustomer(id) {
+      const cust = customers.find((c) => c.id === id);
+      if (!cust) return;
+      editingCustomerId = id;
+
+      document.getElementById("customer-name").value = cust.name;
+      document.getElementById("customer-phone").value = cust.phone || "";
+      document.getElementById("customer-address").value = cust.address || "";
+      document.getElementById("customer-notes").value = cust.notes || "";
+
+      const btn = document.getElementById("btn-customer-submit");
+      if (btn) btn.textContent = "Update Customer";
+
+      showMessage(
+        "msg-customer",
+        "Editing existing customer. Change details and click Update Customer.",
+        "success"
+      );
+      document
+        .getElementById("sec-add-customer")
+        .scrollIntoView({ behavior: "smooth" });
+    }
+
+    function removeCustomer(id) {
+      const cust = customers.find((c) => c.id === id);
+      if (!cust) return;
+      const relatedOrders = orders.filter((o) => o.customerId === id);
+      let msg = "Are you sure you want to remove this customer?";
+      if (relatedOrders.length > 0) {
+        msg += ` This will also remove ${relatedOrders.length} related order(s).`;
+      }
+      if (!confirm(msg)) return;
+
+      customers = customers.filter((c) => c.id !== id);
+      saveCustomers();
+      if (relatedOrders.length > 0) {
+        orders = orders.filter((o) => o.customerId !== id);
+        saveOrders();
+      }
+
+      if (editingCustomerId === id) {
+        editingCustomerId = null;
+        document.getElementById("form-customer").reset();
+        const btn = document.getElementById("btn-customer-submit");
+        if (btn) btn.textContent = "Save Customer";
+      }
+
+      renderCustomerList();
+      refreshCustomerDropdowns();
+      refreshReportFilters();
+      renderReportTable();
+      refreshBillingSection();
+      renderManageTable();
+      showMessage("msg-customer", "Customer removed successfully.", "success");
+    }
+
+    // ===============================
+    // ORDER TYPE HELPERS
+    // ===============================
+    function populateOrderTypeSelect(selectId) {
+      const sel = document.getElementById(selectId);
+      if (!sel) return;
+      const current = sel.value;
+      sel.innerHTML = '<option value="">-- Select Order Type --</option>';
+      ORDER_TYPES.forEach((t) => {
+        const opt = document.createElement("option");
+        opt.value = t;
+        opt.textContent = t;
+        sel.appendChild(opt);
+      });
+      sel.value = current;
+    }
+
+    // ===============================
+    // ADD CUSTOMER FORM
+    // ===============================
+    document
+      .getElementById("form-customer")
+      .addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = document.getElementById("customer-name").value.trim();
+        const phone = document.getElementById("customer-phone").value.trim();
+        const address = document
+          .getElementById("customer-address")
+          .value.trim();
+        const notes = document.getElementById("customer-notes").value.trim();
+
+        if (!name) {
+          showMessage("msg-customer", "Customer name is required.", "error");
+          return;
+        }
+
+        const btn = document.getElementById("btn-customer-submit");
+
+        if (editingCustomerId) {
+          const cust = customers.find((c) => c.id === editingCustomerId);
+          if (!cust) {
+            editingCustomerId = null;
+          } else {
+            cust.name = name;
+            cust.phone = phone;
+            cust.address = address;
+            cust.notes = notes;
+            saveCustomers();
+            showMessage(
+              "msg-customer",
+              "Customer updated successfully.",
+              "success"
+            );
+            editingCustomerId = null;
+            if (btn) btn.textContent = "Save Customer";
+            e.target.reset();
+            renderCustomerList();
+            refreshCustomerDropdowns();
+            refreshReportFilters();
+            renderReportTable();
+            refreshBillingSection();
+            renderManageTable();
+            return;
+          }
+        }
+
+        const newCustomer = {
+          id: Date.now().toString(),
+          name,
+          phone,
+          address,
+          notes,
+          createdAt: new Date().toISOString(),
+        };
+        customers.push(newCustomer);
+        saveCustomers();
+
+        e.target.reset();
+        if (btn) btn.textContent = "Save Customer";
+        showMessage("msg-customer", "Customer saved successfully.", "success");
+
+        renderCustomerList();
+        refreshCustomerDropdowns();
+        refreshReportFilters();
+      });
+
+    // ===============================
+    // ADD ORDER
+    // ===============================
+    const orderTypeSelect = document.getElementById("order-type");
+    const orderTypeOtherGroup = document.getElementById(
+      "group-order-type-other"
+    );
+    const orderTypeOtherInput = document.getElementById("order-type-other");
+    const chkAdvance = document.getElementById("order-advance-check");
+    const advanceGroup = document.getElementById("group-advance");
+    const advanceInput = document.getElementById("order-advance");
+    const priceInput = document.getElementById("order-price");
+    const pendingDisplay = document.getElementById("order-pending");
+    const orderDateInput = document.getElementById("order-date");
+
+    function updateOrderTypeOtherVisibility() {
+      if (orderTypeSelect.value === "Other") {
+        orderTypeOtherGroup.style.display = "";
+      } else {
+        orderTypeOtherGroup.style.display = "none";
+        orderTypeOtherInput.value = "";
+      }
+    }
+
+    function updateAdvanceVisibility() {
+      if (chkAdvance.checked) {
+        advanceGroup.style.display = "";
+      } else {
+        advanceGroup.style.display = "none";
+        advanceInput.value = "0";
+        calculatePendingAmount();
+      }
+    }
+
+    function calculatePendingAmount() {
+      const price = parseFloat(priceInput.value) || 0;
+      const adv = chkAdvance.checked
+        ? parseFloat(advanceInput.value) || 0
+        : 0;
+      const pending = Math.max(0, price - adv);
+      pendingDisplay.value = pending.toFixed(2);
+      return pending;
+    }
+
+    orderTypeSelect.addEventListener("change", updateOrderTypeOtherVisibility);
+    chkAdvance.addEventListener("change", updateAdvanceVisibility);
+    priceInput.addEventListener("input", calculatePendingAmount);
+    advanceInput.addEventListener("input", calculatePendingAmount);
+
+    document.getElementById("form-order").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const custId = document.getElementById("order-customer").value;
+      if (!custId) {
+        showMessage("msg-order", "Please select a customer.", "error");
+        return;
+      }
+
+      let otype = orderTypeSelect.value;
+      if (!otype) {
+        showMessage("msg-order", "Please select an order type.", "error");
+        return;
+      }
+      if (otype === "Other") {
+        const otherTxt = orderTypeOtherInput.value.trim();
+        if (!otherTxt) {
+          showMessage(
+            "msg-order",
+            "Please type the order type in 'Other Order Type'.",
+            "error"
+          );
+          return;
+        }
+        otype = otherTxt;
+      }
+
+      let orderDate = orderDateInput.value;
+      if (!orderDate) {
+        const d = new Date();
+        orderDate = d.toISOString().split("T")[0];
+      }
+
+      const priceVal = parseFloat(priceInput.value);
+      if (!priceVal || priceVal < 0) {
+        showMessage("msg-order", "Please enter a valid price.", "error");
+        return;
+      }
+
+      const advVal =
+        chkAdvance.checked === true
+          ? parseFloat(advanceInput.value) || 0
+          : 0;
+      const pending = calculatePendingAmount();
+
+      const desc = document
+        .getElementById("order-description")
+        .value.trim();
+
+      const newOrder = {
+        id: Date.now().toString(),
+        customerId: custId,
+        orderType: otype,
+        description: desc,
+        price: priceVal,
+        advanceAmount: advVal,
+        pendingAmount: pending,
+        status: "Received",
+        orderDate: orderDate,
+        createdAt: new Date().toISOString(),
+      };
+
+      orders.push(newOrder);
+      saveOrders();
+
+      e.target.reset();
+      orderTypeOtherGroup.style.display = "none";
+      advanceGroup.style.display = "none";
+      pendingDisplay.value = "0.00";
+      showMessage("msg-order", "Order saved successfully.", "success");
+
+      refreshBillingSection();
+      refreshReportFilters();
+      renderReportTable();
+      renderManageTable();
+    });
+
+    // ===============================
+    // DATE UTIL FOR ORDERS
+    // ===============================
+    function formatDateFromOrder(order) {
+      let d;
+      if (order.orderDate) {
+        d = new Date(order.orderDate);
+      } else if (order.createdAt) {
+        d = new Date(order.createdAt);
+      } else {
+        return "";
+      }
+      if (isNaN(d)) return "";
+      return d.toLocaleDateString();
+    }
+
+    function computePaymentStatus(order) {
+      if (order.pendingAmount <= 0 && (order.price > 0 || order.advanceAmount > 0)) {
+        return "Paid";
+      }
+      if (!order.advanceAmount || order.advanceAmount <= 0) {
+        return "Not Paid";
+      }
+      return "Pending";
+    }
+
+    // ===============================
+    // BILLING RECEIPT (MULTI-ORDER, NEW WINDOW)
+    // ===============================
+    const billCustomerSelect = document.getElementById("bill-customer-select");
+    const billOrdersTbody = document.getElementById("bill-orders-tbody");
+
+    function refreshBillingSection() {
+      billCustomerSelect.value = "";
+      billOrdersTbody.innerHTML = "";
+    }
+
+    billCustomerSelect.addEventListener("change", () => {
+      const custId = billCustomerSelect.value;
+      billOrdersTbody.innerHTML = "";
+      if (!custId) return;
+
+      const customerOrders = orders.filter((o) => o.customerId === custId);
+      customerOrders.forEach((o) => {
+        const tr = document.createElement("tr");
+        const dateStr = formatDateFromOrder(o);
+        tr.innerHTML = `
+          <td><input type="checkbox" class="bill-order-checkbox" data-order-id="${o.id}"></td>
+          <td>${o.id}</td>
+          <td>${dateStr || "-"}</td>
+          <td>${o.orderType}</td>
+          <td>${o.description || "-"}</td>
+          <td>₹${o.price.toFixed(2)}</td>
+          <td>₹${o.advanceAmount.toFixed(2)}</td>
+          <td>₹${o.pendingAmount.toFixed(2)}</td>
+          <td>${o.status}</td>
+        `;
+        billOrdersTbody.appendChild(tr);
+      });
+    });
+
+    function openReceiptWindow() {
+      const custId = billCustomerSelect.value;
+      if (!custId) {
+        alert("Please select a customer.");
+        return;
+      }
+
+      const checkboxes = billOrdersTbody.querySelectorAll(
+        ".bill-order-checkbox:checked"
+      );
+      const selectedIds = Array.from(checkboxes).map(
+        (cb) => cb.dataset.orderId
+      );
+
+      if (selectedIds.length === 0) {
+        alert("Please tick at least one order.");
+        return;
+      }
+
+      const cust = findCustomerById(custId);
+      const selectedOrders = orders.filter((o) =>
+        selectedIds.includes(o.id)
+      );
+
+      let totalPrice = 0;
+      let totalPaid = 0;
+      let totalPending = 0;
+
+      let rowsHtml = "";
+
+      selectedOrders.forEach((o) => {
+        const dateStr = formatDateFromOrder(o);
+        const paymentStatus = computePaymentStatus(o);
+        const paymentDateStr =
+          dateStr ||
+          (o.createdAt
+            ? new Date(o.createdAt).toLocaleDateString()
+            : "-");
+
+        totalPrice += o.price;
+        totalPaid += o.advanceAmount;
+        totalPending += o.pendingAmount;
+
+        rowsHtml += `
+          <tr>
+            <td>${o.id}</td>
+            <td>${dateStr || "-"}</td>
+            <td>${o.orderType}</td>
+            <td>${o.description || "-"}</td>
+            <td>₹${o.price.toFixed(2)}</td>
+            <td>₹${o.advanceAmount.toFixed(
+              2
+            )}<br><span style="font-size:11px;">(${paymentDateStr})</span></td>
+            <td>₹${o.pendingAmount.toFixed(2)}</td>
+            <td>${paymentStatus}</td>
+          </tr>
+        `;
+      });
+
+      let finalStatus = "Pending";
+      if (totalPending <= 0 && totalPrice > 0) {
+        finalStatus = "Paid";
+      } else if (totalPaid <= 0) {
+        finalStatus = "Not Paid";
+      }
+
+      const billDateStr = new Date().toLocaleDateString();
+
+      const receiptHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Saradu - Receipt</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: #fdfdfd;
+      margin: 0;
+      padding: 20px;
+    }
+    .receipt-box {
+      max-width: 800px;
+      margin: 0 auto;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 16px;
+      background: #fff;
+    }
+    .receipt-header {
+      text-align: center;
+      border-bottom: 1px solid #333;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+    }
+    .receipt-header h3 {
+      margin: 0;
+    }
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 2px 0;
+    }
+    .receipt-row strong {
+      font-weight: 600;
+    }
+    .receipt-total {
+      margin-top: 6px;
+      border-top: 1px solid #333;
+      padding-top: 4px;
+      font-weight: 600;
+    }
+    .receipt-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+    .receipt-table th,
+    .receipt-table td {
+      border: 1px solid #333;
+      padding: 4px;
+      text-align: left;
+    }
+    .receipt-table th {
+      background: none;
+      color: #000;
+      font-weight: bold;
+    }
+    .print-btn {
+      margin-top: 10px;
+      padding: 8px 16px;
+      border-radius: 4px;
+      border: none;
+      background: #3498db;
+      color: #fff;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .footer-note {
+      margin-top: 10px;
+      font-size: 11px;
+      text-align: right;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <!-- Entire receipt is editable -->
+  <div class="receipt-box" contenteditable="true">
+    <div class="receipt-header">
+      <h3>Saradu</h3>
+      <div style="font-size:12px;">Tailor Shop Receipt</div>
+    </div>
+    <div class="receipt-row">
+      <strong>Customer:</strong>
+      <span>${cust ? cust.name : "Unknown"}</span>
+    </div>
+    ${
+      cust && cust.phone
+        ? `<div class="receipt-row"><strong>Phone:</strong><span>${cust.phone}</span></div>`
+        : ""
+    }
+    ${
+      cust && cust.address
+        ? `<div class="receipt-row"><strong>Address:</strong><span>${cust.address}</span></div>`
+        : ""
+    }
+    <div class="receipt-row">
+      <strong>Bill Date:</strong>
+      <span>${billDateStr}</span>
+    </div>
+    <hr style="margin:6px 0;">
+    <div style="font-size:13px;margin-bottom:4px;">Selected Orders:</div>
+    <table class="receipt-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Paid (with date)</th>
+          <th>Pending</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rowsHtml}
+      </tbody>
+    </table>
+    <div class="receipt-row receipt-total">
+      <strong>Total Amount</strong>
+      <span>₹${totalPrice.toFixed(2)}</span>
+    </div>
+    <div class="receipt-row">
+      <strong>Total Paid</strong>
+      <span>₹${totalPaid.toFixed(2)}</span>
+    </div>
+    <div class="receipt-row">
+      <strong>Total Pending</strong>
+      <span>₹${totalPending.toFixed(2)}</span>
+    </div>
+    <div class="receipt-row">
+      <strong>Final Status</strong>
+      <span>${finalStatus}</span>
+    </div>
+    
+  </div>
+  <button class="print-btn" onclick="window.print()">Print Receipt</button>
+</body>
+</html>
+      `;
+
+      const win = window.open("", "_blank");
+      win.document.open();
+      win.document.write(receiptHtml);
+      win.document.close();
+    }
+
+    // ===============================
+    // ORDERS REPORT
+    // ===============================
+    const filterCust = document.getElementById("filter-cust");
+    const filterType = document.getElementById("filter-type");
+    const filterStatus = document.getElementById("filter-status");
+    const reportTbody = document.getElementById("report-tbody");
+
+    function getFilteredOrders() {
+      const custVal = filterCust.value;
+      const typeVal = filterType.value;
+      const statusVal = filterStatus.value;
+
+      return orders.filter((o) => {
+        const matchCust = custVal ? o.customerId === custVal : true;
+        const matchType = typeVal ? o.orderType === typeVal : true;
+        const matchStatus = statusVal ? o.status === statusVal : true;
+        return matchCust && matchType && matchStatus;
+      });
+    }
+
+    function refreshReportFilters() {
+      const existingValue = filterType.value;
+      filterType.innerHTML = '<option value="">All Order Types</option>';
+
+      const typesSet = new Set();
+      ORDER_TYPES.forEach((t) => {
+        if (t !== "Other") typesSet.add(t);
+      });
+      orders.forEach((o) => typesSet.add(o.orderType));
+
+      typesSet.forEach((t) => {
+        const opt = document.createElement("option");
+        opt.value = t;
+        opt.textContent = t;
+        filterType.appendChild(opt);
+      });
+
+      filterType.value = existingValue;
+    }
+
+    function renderReportTable() {
+      reportTbody.innerHTML = "";
+      const filtered = getFilteredOrders();
+
+      filtered.forEach((o, idx) => {
+        const tr = document.createElement("tr");
+        const cust = findCustomerById(o.customerId);
+        const dateStr = formatDateFromOrder(o);
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${o.id}</td>
+          <td>${dateStr || "-"}</td>
+          <td>${cust ? cust.name : "Unknown"}</td>
+          <td>${o.orderType}</td>
+          <td>${o.description || "-"}</td>
+          <td>₹${o.price.toFixed(2)}</td>
+          <td>₹${o.advanceAmount.toFixed(2)}</td>
+          <td>₹${o.pendingAmount.toFixed(2)}</td>
+          <td>${o.status}</td>
+        `;
+        reportTbody.appendChild(tr);
+      });
+    }
+
+    function clearReportFilters() {
+      filterCust.value = "";
+      filterType.value = "";
+      filterStatus.value = "";
+      renderReportTable();
+    }
+
+    filterCust.addEventListener("change", renderReportTable);
+    filterType.addEventListener("change", renderReportTable);
+    filterStatus.addEventListener("change", renderReportTable);
+
+    function printReport() {
+      window.print();
+    }
+
+    function exportReportToExcel() {
+      const filtered = getFilteredOrders();
+      let csv = "S.No,Order ID,Order Date,Customer,Order Type,Description,Price,Paid,Pending,Status\n";
+
+      function esc(value) {
+        if (value == null) return "";
+        const str = String(value).replace(/\"/g, '""');
+        return `"${str}"`;
+      }
+
+      filtered.forEach((o, idx) => {
+        const cust = findCustomerById(o.customerId);
+        const dateStr = formatDateFromOrder(o);
+        csv += [
+          esc(idx + 1),
+          esc(o.id),
+          esc(dateStr || ""),
+          esc(cust ? cust.name : "Unknown"),
+          esc(o.orderType),
+          esc(o.description || ""),
+          esc(o.price.toFixed(2)),
+          esc(o.advanceAmount.toFixed(2)),
+          esc(o.pendingAmount.toFixed(2)),
+          esc(o.status),
+        ].join(",") + "\n";
+      });
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "saradu_orders_report.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // ===============================
+    // ORDER MANAGEMENT
+    // ===============================
+    const manageTbody = document.getElementById("manage-tbody");
+    let showPendingOnly = false;
+
+    function togglePendingView() {
+      showPendingOnly = !showPendingOnly;
+      const btn = document.getElementById("btn-toggle-pending");
+      if (showPendingOnly) {
+        btn.textContent = "Show All Orders";
+        btn.classList.add("active");
+      } else {
+        btn.textContent = "Show Only Pending Orders";
+        btn.classList.remove("active");
+      }
+      renderManageTable();
+    }
+
+    function isOrderPending(o) {
+      if (o.pendingAmount > 0) return true;
+      if (o.status !== "Completed" && o.status !== "Delivered") return true;
+      return false;
+    }
+
+    function renderManageTable() {
+      manageTbody.innerHTML = "";
+      const list = showPendingOnly ? orders.filter(isOrderPending) : orders;
+
+      list.forEach((o) => {
+        const cust = findCustomerById(o.customerId);
+        const done = o.status === "Completed" || o.status === "Delivered";
+        const dateStr = formatDateFromOrder(o);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${o.id}</td>
+          <td>${cust ? cust.name : "Unknown"}</td>
+          <td>${dateStr || "-"}</td>
+          <td>${o.orderType}</td>
+          <td>₹${o.price.toFixed(2)}</td>
+          <td>₹${o.advanceAmount.toFixed(2)}</td>
+          <td>₹${o.pendingAmount.toFixed(2)}</td>
+          <td><span class="tag tag-status ${
+            done ? "done" : ""
+          }">${o.status}</span></td>
+          <td>
+            <button class="btn btn-outline" onclick="openEditModal('${o.id}')">Edit</button>
+            <button class="btn btn-danger" onclick="removeOrder('${o.id}')">Remove</button>
+          </td>
+        `;
+        manageTbody.appendChild(tr);
+      });
+    }
+
+    function removeOrder(orderId) {
+      const order = orders.find((o) => o.id === orderId);
+      if (!order) return;
+      if (!confirm("Are you sure you want to remove this order?")) return;
+
+      orders = orders.filter((o) => o.id !== orderId);
+      saveOrders();
+      renderManageTable();
+      renderReportTable();
+      refreshBillingSection();
+    }
+
+    // ===== EDIT ORDER MODAL =====
+    const modalBackdrop = document.getElementById("modal-backdrop");
+    const editIdInput = document.getElementById("edit-id");
+    const editCustNameInput = document.getElementById("edit-customer-name");
+    const editDateInput = document.getElementById("edit-date");
+    const editTypeSelect = document.getElementById("edit-type");
+    const editTypeOtherGroup = document.getElementById("group-edit-type-other");
+    const editTypeOtherInput = document.getElementById("edit-type-other");
+    const editDesc = document.getElementById("edit-description");
+    const editPrice = document.getElementById("edit-price");
+    const editAdvance = document.getElementById("edit-advance");
+    const editPending = document.getElementById("edit-pending");
+    const editStatus = document.getElementById("edit-status");
+
+    function openEditModal(orderId) {
+      const order = orders.find((o) => o.id === orderId);
+      if (!order) return;
+      const cust = findCustomerById(order.customerId);
+
+      editIdInput.value = order.id;
+      editCustNameInput.value = cust ? cust.name : "Unknown";
+
+      // set date
+      if (order.orderDate) {
+        editDateInput.value = order.orderDate;
+      } else if (order.createdAt) {
+        const d = new Date(order.createdAt);
+        if (!isNaN(d)) {
+          editDateInput.value = d.toISOString().split("T")[0];
+        } else {
+          editDateInput.value = "";
+        }
+      } else {
+        editDateInput.value = "";
+      }
+
+      populateOrderTypeSelect("edit-type");
+
+      if (ORDER_TYPES.includes(order.orderType)) {
+        editTypeSelect.value = order.orderType;
+        editTypeOtherGroup.style.display = "none";
+        editTypeOtherInput.value = "";
+      } else {
+        editTypeSelect.value = "Other";
+        editTypeOtherGroup.style.display = "";
+        editTypeOtherInput.value = order.orderType;
+      }
+
+      editDesc.value = order.description || "";
+      editPrice.value = order.price.toString();
+      editAdvance.value = order.advanceAmount.toString();
+      editPending.value = order.pendingAmount.toFixed(2);
+      editStatus.value = order.status;
+
+      modalBackdrop.classList.add("active");
+    }
+
+    function closeEditModal() {
+      modalBackdrop.classList.remove("active");
+      document.getElementById("form-edit-order").reset();
+    }
+
+    editTypeSelect.addEventListener("change", () => {
+      if (editTypeSelect.value === "Other") {
+        editTypeOtherGroup.style.display = "";
+      } else {
+        editTypeOtherGroup.style.display = "none";
+        editTypeOtherInput.value = "";
+      }
+    });
+
+    function recalcEditPending() {
+      const price = parseFloat(editPrice.value) || 0;
+      const adv = parseFloat(editAdvance.value) || 0;
+      const pending = Math.max(0, price - adv);
+      editPending.value = pending.toFixed(2);
+      return pending;
+    }
+
+    editPrice.addEventListener("input", recalcEditPending);
+    editAdvance.addEventListener("input", recalcEditPending);
+
+    document
+      .getElementById("form-edit-order")
+      .addEventListener("submit", (e) => {
+        e.preventDefault();
+        const orderId = editIdInput.value;
+        const order = orders.find((o) => o.id === orderId);
+        if (!order) return;
+
+        let otype = editTypeSelect.value;
+        if (!otype) {
+          alert("Please select order type.");
+          return;
+        }
+        if (otype === "Other") {
+          const otherTxt = editTypeOtherInput.value.trim();
+          if (!otherTxt) {
+            alert("Please type order type in Other.");
+            return;
+          }
+          otype = otherTxt;
+        }
+
+        const priceVal = parseFloat(editPrice.value);
+        if (!priceVal || priceVal < 0) {
+          alert("Please enter valid price.");
+          return;
+        }
+        const advVal = parseFloat(editAdvance.value) || 0;
+        const pending = recalcEditPending();
+
+        let newDateVal = editDateInput.value;
+        if (!newDateVal && order.orderDate) {
+          newDateVal = order.orderDate;
+        }
+
+        order.orderType = otype;
+        order.description = editDesc.value.trim();
+        order.price = priceVal;
+        order.advanceAmount = advVal;
+        order.pendingAmount = pending;
+        order.status = editStatus.value;
+        order.orderDate = newDateVal || null;
+        saveOrders();
+
+        showMessage("msg-manage", "Order updated successfully.", "success");
+        closeEditModal();
+        renderManageTable();
+        renderReportTable();
+        refreshBillingSection();
+      });
+
+    // ===============================
+    // INITIALIZE ON LOAD
+    // ===============================
+    document.addEventListener("DOMContentLoaded", () => {
+      loadData();
+      populateOrderTypeSelect("order-type");
+      populateOrderTypeSelect("edit-type");
+      refreshCustomerDropdowns();
+      renderCustomerList();
+      refreshReportFilters();
+      renderReportTable();
+      renderManageTable();
+
+      // default order date to today
+      if (orderDateInput) {
+        const d = new Date();
+        orderDateInput.valueAsDate = d;
+      }
+    });
+  </script>
+</body>
+</html>
